@@ -27,7 +27,11 @@ namespace NelderMeadSimplex
             str = String.Format("{0}\r\n{1}\r\n\r\n", "Thank you.", "This is great.");
             textBox1.Text = str;
 
-            //// Insert NelderMeadSimplex implementation here
+            // Insert NelderMeadSimplex implementation here
+
+            MathNet.Numerics.Optimization.NelderMeadSimplex simplex = new MathNet.Numerics.Optimization.NelderMeadSimplex(.00001,10000);
+            textBox1.Text = simplex.ConvergenceTolerance.ToString();
+
         }
     }
 }
