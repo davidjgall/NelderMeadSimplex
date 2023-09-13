@@ -36,6 +36,7 @@ namespace NelderMeadSimplexTest
             this.label1 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -56,7 +57,7 @@ namespace NelderMeadSimplexTest
             this.textBox1.Location = new System.Drawing.Point(12, 41);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(776, 397);
+            this.textBox1.Size = new System.Drawing.Size(776, 128);
             this.textBox1.TabIndex = 1;
             this.textBox1.TabStop = false;
             // 
@@ -107,11 +108,22 @@ namespace NelderMeadSimplexTest
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(360, 12);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(81, 23);
+            this.button5.TabIndex = 6;
+            this.button5.Text = "Show Graph";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(800, 181);
+            this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.label1);
@@ -135,6 +147,7 @@ namespace NelderMeadSimplexTest
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button5;
     }
 }
 

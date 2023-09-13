@@ -14,116 +14,80 @@ using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace NelderMeadSimplexTest
 {
+    // Fit exponential expression with three parameters
+
     public partial class Form1 : Form
     {
         //Initialize global variables
-        private Random RanGen => new Random();
+        private Random RanGen = new Random();
         private double[] x { get; set; } = new double[100];
         private double[] y { get; set; } = new double[100];
+        private double[] y_out { get; set; } = new double[100];
         private MinimizationResult minResult { get; set; }
         private double a { get; set; }
         private double b { get; set; }
         private double c { get; set; }
 
+        Form2 GraphicsForm = new Form2();
+        
         private void SetCoefficients()
         {
-            if ((a == 5.0) && (b == 0.5) && (c == 0.05))
-            {
-                Console.WriteLine("Not Resetting Coefficients");
-                return;
-            }
-
-            a = 5.0;
+            a = 2.0;
             b = 0.5;
             c = 0.05;
-
-            Console.WriteLine("Coefficients set to: a = {0,12:F4}   b = {0,12:F4}   c = {0,12:F4}", a, b, c);
-
-            InitializeData();
         }
 
         private void RandomizeCoefficients()
         {
-            a = 5.0 * RanGen.NextDouble();
+            a = 3.0 + 2.0 * RanGen.NextDouble();
             b = 0.5 * RanGen.NextDouble();
             c = 0.05 * RanGen.NextDouble();
-
-            Console.WriteLine("Coefficients set to: a = {0,12:F4}   b = {1,12:F4}   c = {2,12:F4}", a, b, c);
-
-            InitializeData();
         }
 
         private void InitializeData()
         {
             // create data set
+            double y_val;
+
             for (int i = 0; i < 100; i++) x[i] = 10 + Convert.ToDouble(i) * 90.0 / 99.0; // values span 10 to 100
             for (int i = 0; i < 100; i++)
             {
-                double y_val = a + b * Math.Exp(c * x[i]);
-                y[i] = y_val + 0.1 * RanGen.NextDouble() * y_val;  // add error term scaled to y-value
+                y_val = a + b * Math.Exp(c * x[i]);
+                y[i] = y_val + 10 * RanGen.NextDouble();  // add error term to y-value
             }
-
-            Console.WriteLine("Data Initialized");
-
-            ShowFactors();
         }
 
         private void Solve()
         {
             InitializeData();
-
-            //Fit exponential expression with three parameters
-            //NelderMeadSimplex implementation begins here
-            NelderMeadSimplex Simplex = new NelderMeadSimplex(convergenceTolerance: 1e-5, maximumIterations: 10000);
-
-            //Vector<double> initialGuess = Vector<double>.Build.Dense(3);
-            //var initialGuess = new DenseVector(new[] { 3.0, 6.0, 0.6 });
-            //DenseVector initialGuess = new DenseVector(3);
-            //DenseVector initialGuess = new DenseVector(new[] { 3.0, 6.0, 0.6 });
             Vector<double> initialGuess = Vector<double>.Build.Dense(new[] { 3.0, 6.0, 0.6 });
-
-            //f1 is a dummy lambda expression for testing
-            //var f1 = new Func<Vector<double>, double>(x => 2.5);
-            //var obj = ObjectiveFunction.Value(f1);
-            var obj = ObjectiveFunction.Value(SumSqError);
-
-            minResult = Simplex.FindMinimum(obj, initialGuess);
-
-            ShowResult();
+            RunSolver(initialGuess);
         }
 
         private void ReSolve()
         {
-            //Initialize();
             if ((minResult == null) || (minResult.MinimizingPoint.Count < 3))
             {
                 Console.WriteLine("No Initial Guess Values");
                 return;
             }
+            RunSolver(minResult.MinimizingPoint);
+        }
 
-            //Fit exponential expression with three parameters
+        private void RunSolver(Vector<double> initialGuess)
+        {
             //NelderMeadSimplex implementation begins here
+
             NelderMeadSimplex Simplex = new NelderMeadSimplex(convergenceTolerance: 1e-5, maximumIterations: 10000);
-
-            //Vector<double> initialGuess = Vector<double>.Build.Dense(3);
-            //var initialGuess = new DenseVector(new[] { 3.0, 6.0, 0.6 });
-            //DenseVector initialGuess = new DenseVector(3);
-            //DenseVector initialGuess = new DenseVector(new[] { 3.0, 6.0, 0.6 });
-
-            //DenseVector initialGuess = (DenseVector)minResult.MinimizingPoint;
-            Vector<double> initialGuess = minResult.MinimizingPoint;
-
-            Console.WriteLine(initialGuess.ToString());
-
-
-            //f1 is a dummy lambda expression for testing
-            //var f1 = new Func<Vector<double>, double>(x => 2.5);
-            //var obj = ObjectiveFunction.Value(f1);
             var obj = ObjectiveFunction.Value(SumSqError);
-
             minResult = Simplex.FindMinimum(obj, initialGuess);
 
+            StoreOutput();
             ShowResult();
+            GraphicsForm.UpdateData(x, y, y_out, minResult, a, b, c);
+            GraphicsForm.DrawImage();
+
+            //Console.WriteLine(String.Format("minResult = {0}  iterations = {1}", minResult.FunctionInfoAtMinimum.Value, minResult.Iterations));
         }
 
         private double SumSqError(Vector<double> v)
@@ -134,7 +98,16 @@ namespace NelderMeadSimplexTest
                 double y_val = v[0] + v[1] * Math.Exp(v[2] * x[i]);
                 err += Math.Pow(y_val - y[i], 2);
             }
+            //Console.WriteLine(String.Format("err = {0}", err));
             return err;
+        }
+
+        private void StoreOutput()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                y_out[i] = minResult.MinimizingPoint[0] + minResult.MinimizingPoint[1] * Math.Exp(minResult.MinimizingPoint[2] * x[i]);
+            }
         }
 
         public Form1()
@@ -142,6 +115,8 @@ namespace NelderMeadSimplexTest
             InitializeComponent();
             SetCoefficients();
             ShowFactors();
+            GraphicsForm.ControlBox = false;
+            Solve();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -157,11 +132,20 @@ namespace NelderMeadSimplexTest
         private void button3_Click(object sender, EventArgs e)
         {
             RandomizeCoefficients();
+            ShowFactors();
+            Solve();
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
             SetCoefficients();
+            ShowFactors();
+            Solve();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            GraphicsForm.Show();
         }
 
         private void ShowFactors()
@@ -170,6 +154,7 @@ namespace NelderMeadSimplexTest
             str = String.Format("{0,12:F4}{1,12:F4}{2,12:F4}", a, b, c);
             textBox2.Text = str;
         }
+
         private void ShowResult()
         {
             String str;
@@ -178,6 +163,11 @@ namespace NelderMeadSimplexTest
             str += String.Format("{0,12:F4}   {1,12:F4}   {2,12:F4}", minResult.MinimizingPoint[0], minResult.MinimizingPoint[1], minResult.MinimizingPoint[2]);
 
             textBox1.Text = str;
+        }
+
+        private void Form1_FormClosing(Object sender, FormClosingEventArgs e)
+        {
+            GraphicsForm.Close();
         }
     }
 }
