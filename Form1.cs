@@ -27,6 +27,7 @@ namespace NelderMeadSimplexTest
         private double a { get; set; }
         private double b { get; set; }
         private double c { get; set; }
+        Vector<double> initialGuess { get; } = Vector<double>.Build.Dense(new[] { 3.0, 1.0, 0.6 });
 
         Form2 GraphicsForm = new Form2();
         
@@ -39,7 +40,7 @@ namespace NelderMeadSimplexTest
 
         private void RandomizeCoefficients()
         {
-            a = 3.0 + 2.0 * RanGen.NextDouble();
+            a = 4.0 + 2.0 * RanGen.NextDouble();
             b = 0.5 * RanGen.NextDouble();
             c = 0.05 * RanGen.NextDouble();
         }
@@ -49,18 +50,24 @@ namespace NelderMeadSimplexTest
             // create data set
             double y_val;
 
-            for (int i = 0; i < 100; i++) x[i] = 10 + Convert.ToDouble(i) * 90.0 / 99.0; // values span 10 to 100
+            for (int i = 0; i < 100; i++) x[i] = Convert.ToDouble(i); // values span 0 to 100
             for (int i = 0; i < 100; i++)
             {
-                y_val = a + b * Math.Exp(c * x[i]);
-                y[i] = y_val + 10 * RanGen.NextDouble();  // add error term to y-value
+                y_val = TheEquation(a, b, c, x[i]);
+                y[i] = y_val + 5 * (RanGen.NextDouble() - (1/2));  // add error term to y-value
             }
+        }
+
+        private double TheEquation(double a, double b, double c, double x)
+        {
+            double y;
+            y = a + b * Math.Exp(c * x);
+            return y;
         }
 
         private void Solve()
         {
             InitializeData();
-            Vector<double> initialGuess = Vector<double>.Build.Dense(new[] { 3.0, 6.0, 0.6 });
             RunSolver(initialGuess);
         }
 
@@ -95,7 +102,7 @@ namespace NelderMeadSimplexTest
             double err = 0;
             for (int i = 0; i < 100; i++)
             {
-                double y_val = v[0] + v[1] * Math.Exp(v[2] * x[i]);
+                double y_val = TheEquation(v[0], v[1], v[2], x[i]);
                 err += Math.Pow(y_val - y[i], 2);
             }
             //Console.WriteLine(String.Format("err = {0}", err));
