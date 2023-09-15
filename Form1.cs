@@ -50,7 +50,7 @@ namespace NelderMeadSimplexTest
             // create data set
             double y_val;
 
-            for (int i = 0; i < 100; i++) x[i] = Convert.ToDouble(i); // values span 0 to 100
+            for (int i = 0; i < 100; i++) x[i] = Convert.ToDouble(i); // values span 0 to 99
             for (int i = 0; i < 100; i++)
             {
                 y_val = TheEquation(a, b, c, x[i]);
@@ -92,9 +92,6 @@ namespace NelderMeadSimplexTest
             StoreOutput();
             ShowResult();
             GraphicsForm.UpdateData(x, y, y_out, minResult, a, b, c);
-            GraphicsForm.DrawImage();
-
-            //Console.WriteLine(String.Format("minResult = {0}  iterations = {1}", minResult.FunctionInfoAtMinimum.Value, minResult.Iterations));
         }
 
         private double SumSqError(Vector<double> v)
@@ -105,7 +102,7 @@ namespace NelderMeadSimplexTest
                 double y_val = TheEquation(v[0], v[1], v[2], x[i]);
                 err += Math.Pow(y_val - y[i], 2);
             }
-            //Console.WriteLine(String.Format("err = {0}", err));
+
             return err;
         }
 

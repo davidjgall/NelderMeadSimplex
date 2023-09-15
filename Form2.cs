@@ -24,6 +24,8 @@ namespace NelderMeadSimplexTest
         private double a { get; set; }
         private double b { get; set; }
         private double c { get; set; }
+        private double X { get; set;}
+        private double Y { get; set; }
 
         public Form2()
         {
@@ -39,6 +41,8 @@ namespace NelderMeadSimplexTest
             a = aa;
             b = bb;
             c = cc;
+
+            DrawImage();
         }
 
         private void Form2_Load(object sender, EventArgs e)
@@ -46,7 +50,7 @@ namespace NelderMeadSimplexTest
             DrawImage();
         }
 
-        public void DrawImage()
+        private void DrawImage()
         {
             if (x.Length < 100 || y.Length < 100 || y_out.Length < 100)
             {
@@ -54,50 +58,93 @@ namespace NelderMeadSimplexTest
                 return;
             }
 
-            int ImageWidth = pictureBox1.Width;
-            int ImageHeight = pictureBox1.Height;
+            int PixelOffset = 0;
+            int PixelSize = PixelOffset * 2;
+            PixelSize = PixelSize >= 1 ? PixelSize : 1;
 
-            Bitmap imageBuffer = new Bitmap(ImageWidth, ImageHeight);
+            int borderpadding = PixelOffset + 15;
+
+            int DisplayWidth = pictureBox1.DisplayRectangle.Width;
+            int DisplayHeight = pictureBox1.DisplayRectangle.Height;
+
+            int ImageWidth = DisplayWidth - 2 * borderpadding;
+            int ImageHeight = DisplayHeight - 2 * borderpadding;
+
+            double Xmin = Math.Floor(x.Min());
+            double Xmax = Math.Ceiling(x.Max());
+            double Ymin = Math.Floor(Math.Min(y.Min(), y_out.Min()));
+            double Ymax = Math.Ceiling(Math.Max(y.Max(), y_out.Max()));
+
+            double xExtent = Math.Abs(Math.Ceiling(Xmax - Xmin));
+            double yExtent = Math.Abs(Math.Ceiling(Ymax - Ymin));
+
+            double WidthScale = (double)ImageWidth / xExtent;
+            double HeightScale = (double)ImageHeight / yExtent;
+
+            Bitmap imageBuffer = new Bitmap(DisplayWidth, DisplayHeight);
             Graphics iBgraphics = Graphics.FromImage(imageBuffer);
 
-            int borderpadding = 10;
-            int xExtent = (int)(Math.Ceiling(x.Max()) - Math.Floor(x.Min())) + borderpadding;
-            int yExtent = (int)(Math.Ceiling(y.Max()) - Math.Floor(y.Min())) + borderpadding;
-            float WidthScale = ImageWidth / xExtent;
-            float HeightScale = ImageHeight / yExtent;
-            float PixelScale = (float)5.0;
+            iBgraphics.Clear(BackColor);
 
             Color color = Color.Black;
-            Pen pen = new Pen(color, 2)
+            Pen pen = new Pen(color, PixelSize)
             {
                 StartCap = System.Drawing.Drawing2D.LineCap.Round,
-                EndCap = System.Drawing.Drawing2D.LineCap.Round,
-                Width = PixelScale
+                EndCap = System.Drawing.Drawing2D.LineCap.Round
             };
 
             Point startPoint;
             Point endPoint;
 
             //Draw fitted curve
-            startPoint = new Point((int)(x[0] * WidthScale - PixelScale / 2) + borderpadding, (int)(y_out[0] * HeightScale - PixelScale / 2) + borderpadding);
+            X = x[0] - Xmin;
+            Y = y_out[0] - Ymin;
+
+            X *= WidthScale; Y *= HeightScale;
+            X -= PixelOffset; Y -= PixelOffset;
+            X += borderpadding; Y += borderpadding;
+
+            startPoint = new Point((int)X, (int)Y);
+
             for (int i = 1; i < 100; i++)
             {
-                endPoint = new Point((int)(x[i] * WidthScale - PixelScale / 2) + borderpadding, (int)(y_out[i] * HeightScale - PixelScale / 2) + borderpadding);
+                X = x[i] - Xmin;
+                Y = y_out[i] - Ymin;
+
+                X *= WidthScale; Y *= HeightScale;
+                X -= PixelOffset; Y -= PixelOffset;
+                X += borderpadding; Y += borderpadding;
+
+                endPoint = new Point((int)X, (int)Y);
+
                 iBgraphics.DrawLine(pen, startPoint, endPoint);
+
                 startPoint = endPoint;
             }
 
             color = Color.Red;
             SolidBrush brush = new SolidBrush(color);
 
+            PixelSize = PixelSize >= 2 ? PixelSize : 2;
+
             //Draw data points
             for (int i = 0; i < 100; i++)
             {
-                Rectangle rectangle = new Rectangle((int)(x[i] * WidthScale - PixelScale / 2) + borderpadding, (int)(y[i] * HeightScale - PixelScale / 2) + borderpadding, (int)PixelScale, (int)PixelScale);
+                X = x[i] - Xmin;
+                Y = y[i] - Ymin;
+
+                X *= WidthScale; Y *= HeightScale;
+                X -= PixelOffset; Y -= PixelOffset;
+                X += borderpadding; Y += borderpadding;
+
+                Rectangle rectangle = new Rectangle((int)X, (int)Y, PixelSize, PixelSize);
+
                 iBgraphics.FillEllipse(brush, rectangle);
             }
 
             //Display results
+            imageBuffer.RotateFlip(RotateFlipType.RotateNoneFlipY);
+            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox1.Image = imageBuffer;
             if (minResult != null) textBox1.Text = String.Format("{0,4}", minResult.FunctionInfoAtMinimum.Value);
 
