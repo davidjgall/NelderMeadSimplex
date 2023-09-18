@@ -14,12 +14,12 @@ using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace NelderMeadSimplexTest
 {
-    public partial class Form2 : Form
+    public partial class GraphicsForm : Form
     {
         //Initialize global variables
-        private double[] x { get; set; } = new double[100];
-        private double[] y { get; set; } = new double[100];
-        private double[] y_out { get; set; } = new double[100];
+        private Vector<double> x { get; set; } = Vector<double>.Build.Dense(100);
+        private Vector<double> y { get; set; } = Vector<double>.Build.Dense(100);
+        private Vector<double> y_out { get; set; } = Vector<double>.Build.Dense(100);
         private MinimizationResult minResult { get; set; }
         private double a { get; set; }
         private double b { get; set; }
@@ -27,12 +27,13 @@ namespace NelderMeadSimplexTest
         private double X { get; set;}
         private double Y { get; set; }
 
-        public Form2()
+        public GraphicsForm()
         {
             InitializeComponent();
         }
 
-        public void UpdateData(double[] xx, double[] yy, double[] yy_out, MinimizationResult minRes, double aa, double bb, double cc)
+        public void UpdateData(Vector<double> xx, Vector<double> yy, Vector<double> yy_out, 
+                                MinimizationResult minRes, double aa, double bb, double cc)
         {
             x = xx;
             y = yy;
@@ -45,14 +46,14 @@ namespace NelderMeadSimplexTest
             DrawImage();
         }
 
-        private void Form2_Load(object sender, EventArgs e)
+        private void GraphicsForm_Load(object sender, EventArgs e)
         {
             DrawImage();
         }
 
         private void DrawImage()
         {
-            if (x.Length < 100 || y.Length < 100 || y_out.Length < 100)
+            if (x.Count < 100 || y.Count < 100 || y_out.Count < 100)
             {
                 Console.WriteLine("Exiting DrawImage--no data");
                 return;
@@ -64,8 +65,8 @@ namespace NelderMeadSimplexTest
 
             int borderpadding = PixelOffset + 15;
 
-            int DisplayWidth = pictureBox1.DisplayRectangle.Width;
-            int DisplayHeight = pictureBox1.DisplayRectangle.Height;
+            int DisplayWidth = PictureBox.DisplayRectangle.Width;
+            int DisplayHeight = PictureBox.DisplayRectangle.Height;
 
             int ImageWidth = DisplayWidth - 2 * borderpadding;
             int ImageHeight = DisplayHeight - 2 * borderpadding;
@@ -144,15 +145,15 @@ namespace NelderMeadSimplexTest
 
             //Display results
             imageBuffer.RotateFlip(RotateFlipType.RotateNoneFlipY);
-            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBox1.Image = imageBuffer;
-            if (minResult != null) textBox1.Text = String.Format("{0,4}", minResult.FunctionInfoAtMinimum.Value);
+            PictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
+            PictureBox.Image = imageBuffer;
+            if (minResult != null) SSETextBox.Text = String.Format("{0,4}", minResult.FunctionInfoAtMinimum.Value);
 
             pen.Dispose();
             brush.Dispose();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void CloseButton_Click(object sender, EventArgs e)
         {
             Hide();
         }
